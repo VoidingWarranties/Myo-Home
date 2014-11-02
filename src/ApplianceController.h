@@ -66,6 +66,10 @@ class ApplianceController {
     if (current_appliance_ == media) media_controller_.onPeriodic();
   }
 
+  void onArmRecognized(myo::Myo* myo, myo::Arm arm, myo::XDirection x_direction) {
+    media_controller_.onArmRecognized(myo, arm, x_direction);
+  }
+
  private:
   enum Appliance { lights, media };
 

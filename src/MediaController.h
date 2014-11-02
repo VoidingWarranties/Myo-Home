@@ -10,10 +10,18 @@ class MediaController {
         controlling_volume_(false),
         last_pose_(myo::Pose::rest),
         last_pattern_(PosePatterns::Pattern::nothing),
+        arm_(myo::armRight),
         x_direction_(myo::xDirectionUnknown) {}
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
     if (pattern == PosePatterns::singleClick) {
+      if (arm_ == myo::armLeft) {
+        if (pose == myo::Pose::waveIn) {
+          pose = myo::Pose::waveOut;
+        } else if (pose == myo::Pose::waveOut) {
+          pose = myo::Pose::waveIn;
+        }
+      }
       switch (pose.type()) {
         case myo::Pose::fingersSpread:
           media_manager_.togglePlay();
@@ -66,7 +74,8 @@ class MediaController {
     roll_mid_ = roll_;
     roll_ = roll;
   }
-  void setXDirection(myo::XDirection x_direction) {
+  void onArmRecognized(myo::Myo* myo, myo::Arm arm, myo::XDirection x_direction) {
+    arm_ = arm;
     x_direction_ = x_direction;
   }
 
@@ -77,5 +86,6 @@ class MediaController {
   bool controlling_volume_;
   myo::Pose last_pose_;
   PosePatterns::Pattern last_pattern_;
+  myo::Arm arm_;
   myo::XDirection x_direction_;
 };

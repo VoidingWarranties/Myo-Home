@@ -53,6 +53,10 @@ int main() {
       app_controller.onOrientationData(myo, timestamp, quat);
     });
 
+    listener.setOnArmRecognizedCallback([&app_controller](myo::Myo* myo, uint64_t timestamp, myo::Arm arm, myo::XDirection x_direction) {
+      app_controller.onArmRecognized(myo, arm, x_direction);
+    });
+
     hub.addListener(&listener);
 
     while (true) {
