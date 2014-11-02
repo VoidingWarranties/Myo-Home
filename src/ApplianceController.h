@@ -20,13 +20,18 @@ class ApplianceController {
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
     if (!locker_.locked()) {
-      switch (current_appliance_) {
-        case lights:
-          lights_controller_.setYaw(yaw_);
-          lights_controller_.onPose(myo, pose, pattern);
-          break;
-        case media:
-          break;
+      if (pose == myo::Pose::thumbToPinky &&
+          pattern == PosePatterns::doubleClick) {
+        locker_.lock();
+      } else {
+        switch (current_appliance_) {
+          case lights:
+            lights_controller_.setYaw(yaw_);
+            lights_controller_.onPose(myo, pose, pattern);
+            break;
+          case media:
+            break;
+        }
       }
     } else {
       if (pattern == PosePatterns::doubleClick) {
