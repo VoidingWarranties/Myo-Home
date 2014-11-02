@@ -8,20 +8,21 @@ class MediaController {
         roll_(0),
         roll_mid_(0),
         controlling_volume_(false),
+        controlling_position_(false),
         last_pose_(myo::Pose::rest),
         last_pattern_(PosePatterns::Pattern::nothing),
         arm_(myo::armRight),
         x_direction_(myo::xDirectionUnknown) {}
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
-    if (pattern == PosePatterns::singleClick) {
-      if (arm_ == myo::armLeft) {
-        if (pose == myo::Pose::waveIn) {
-          pose = myo::Pose::waveOut;
-        } else if (pose == myo::Pose::waveOut) {
-          pose = myo::Pose::waveIn;
-        }
+    if (arm_ == myo::armLeft) {
+      if (pose == myo::Pose::waveIn) {
+        pose = myo::Pose::waveOut;
+      } else if (pose == myo::Pose::waveOut) {
+        pose = myo::Pose::waveIn;
       }
+    }
+    if (pattern == PosePatterns::singleClick) {
       switch (pose.type()) {
         case myo::Pose::fingersSpread:
           media_manager_.togglePlay();
@@ -47,6 +48,12 @@ class MediaController {
       controlling_volume_ = false;
       myo->vibrate(myo::Myo::vibrationShort);
     }
+    if (pattern == PosePatterns::hold && (pose == myo::Pose::waveIn || pose == myo::Pose::waveOut)) {
+      controlling_position_ = true;
+      locker_p_->extendUnlock();
+    } else {
+      controlling_position_ = false;
+    }
     last_pose_ = pose;
     last_pattern_ = pattern;
   }
@@ -66,7 +73,14 @@ class MediaController {
       }
       int volume_diff = roll_diff * 300; // Change this to your preference.
       media_manager_.incrementVolumeBy(volume_diff);
-      std::cout << volume_diff << std::endl;
+    }
+    if (controlling_position_) {
+      locker_p_->extendUnlock();
+      if (last_pose_ == myo::Pose::waveIn) {
+        media_manager_.stepBackward();
+      } else {
+        media_manager_.stepForward();
+      }
     }
   }
 
@@ -84,6 +98,7 @@ class MediaController {
   ApplicationControlManager media_manager_;
   float roll_, roll_mid_;
   bool controlling_volume_;
+  bool controlling_position_;
   myo::Pose last_pose_;
   PosePatterns::Pattern last_pattern_;
   myo::Arm arm_;
