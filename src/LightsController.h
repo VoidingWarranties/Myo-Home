@@ -1,7 +1,7 @@
 class LightsController {
  public:
   LightsController(LockController* locker_p)
-      : locker_p_(locker_p), yaw_(0), yaw_mid_(0), light_states_{false} {}
+      : locker_p_(locker_p), roll_(0), roll_mid_(0), yaw_(0), yaw_mid_(0), light_states_{false} {}
 
   void turnOn(size_t light) {
     // assert light < num_lights_
@@ -32,6 +32,15 @@ class LightsController {
     if (yaw_diff < -M_PI) {
       yaw_diff += (2 * M_PI);
     }
+
+    float roll_diff = roll_ - roll_mid_;
+    if (roll_diff > M_PI) {
+      roll_diff -= (2 * M_PI);
+    }
+    if (roll_diff < -M_PI) {
+      roll_diff += (2 * M_PI);
+    }
+
     size_t light = (yaw_diff < 0 ? 0 : 1);
     if (pose == myo::Pose::fingersSpread) {
       turnOn(light);
@@ -40,15 +49,30 @@ class LightsController {
       turnOff(light);
       locker_p_->extendUnlock();
     } else if (pose == myo::Pose::waveIn) {
-      turnOn(0);
-      turnOff(1);
+      if (roll_diff < -0.2) {
+        for (size_t i = 0; i < num_lights_; ++i) {
+          turnOff(i);
+        }
+      } else {
+        turnOn(0);
+        turnOff(1);
+      }
       locker_p_->extendUnlock();
     } else if (pose == myo::Pose::waveOut) {
-      turnOff(0);
-      turnOn(1);
+      if (roll_diff < -0.2) {
+        for (size_t i = 0; i < num_lights_; ++i) {
+          turnOn(i);
+        }
+      } else {
+        turnOff(0);
+        turnOn(1);
+      }
       locker_p_->extendUnlock();
     }
   }
+
+  void setRoll(float roll) { roll_ = roll; }
+  void setRollMid(float mid) { roll_mid_ = mid; }
 
   void setYaw(float yaw) { yaw_ = yaw; }
   void setYawMid(float mid) { yaw_mid_ = mid; }
@@ -57,5 +81,5 @@ class LightsController {
   LockController* locker_p_;
   bool light_states_[2];
   size_t num_lights_ = 2;
-  float yaw_, yaw_mid_;
+  float roll_, roll_mid_, yaw_, yaw_mid_;
 };

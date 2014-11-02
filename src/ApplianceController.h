@@ -24,23 +24,20 @@ class ApplianceController {
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
     if (!locker_.locked()) {
-      if (pose == myo::Pose::thumbToPinky &&
-          pattern == PosePatterns::doubleClick) {
-        locker_.lock();
-      } else {
-        switch (current_appliance_) {
-          case lights:
-            lights_controller_.setYaw(yaw_);
-            lights_controller_.onPose(myo, pose, pattern);
-            break;
-          case media:
-            media_controller_.onPose(myo, pose, pattern);
-            break;
-        }
+      switch (current_appliance_) {
+        case lights:
+          lights_controller_.setRoll(roll_);
+          lights_controller_.setYaw(yaw_);
+          lights_controller_.onPose(myo, pose, pattern);
+          break;
+        case media:
+          media_controller_.onPose(myo, pose, pattern);
+          break;
       }
     } else {
       if (pattern == PosePatterns::doubleClick) {
         if (pose == myo::Pose::fingersSpread) {
+          lights_controller_.setRollMid(roll_);
           lights_controller_.setYawMid(yaw_);
           current_appliance_ = lights;
           locker_.unlock();

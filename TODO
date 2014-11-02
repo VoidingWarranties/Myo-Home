@@ -3,5 +3,10 @@ To Do:
 
 - Implement thermostat control and an on-screen thermostat to take the place of a real Nest thermostat
 - Add a party mode (raise the roof strobes the lights)
-- Implement waveUp and waveDown to turn on and off all lights once Myo-Intelligesture has implemented the gestures
 - Switch controlled media application to VLC for demos
+
+In Progress:
+------------
+
+- Implement waveUp and waveDown to turn on and off all lights once Myo-Intelligesture has implemented the gestures
+  - There is a basic version of this implemented in MyoHome. This functionality should be moved to Myo-Intelligesture by created an expanded Pose enum.
