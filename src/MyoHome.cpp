@@ -4,6 +4,7 @@
 #include "../../Myo-Intelligesture/src/Debounce.h"
 #include "../../Myo-Intelligesture/src/PoseGestures.h"
 #include "../../Myo-Intelligesture/src/PosePatterns.h"
+#include "LockController.h"
 
 #include <myo/myo.hpp>
 
@@ -15,15 +16,28 @@ int main() {
       throw std::runtime_error("Unable to find a Myo!");
     }
 
+    LockController locker(LockController::SUGGESTED_UNLOCK_TIME,
+                          [myo]() {
+                            std::cout << "locked!" << std::endl;
+                            myo->vibrate(myo::Myo::vibrationMedium);
+                          },
+                          [myo]() {
+                            std::cout << "unlocked!" << std::endl;
+                            myo->vibrate(myo::Myo::vibrationShort);
+                            myo->vibrate(myo::Myo::vibrationShort);
+                          });
+
     PosePatterns pose_patts(
         PosePatterns::SUGGESTED_MAX_DELAY,
-        [](myo::Myo* myo, uint64_t timestamp, myo::Pose pose,
-           PosePatterns::Pattern pattern) {
-          // Put callback to unlocking control object here
+        [&locker](myo::Myo* myo, uint64_t timestamp, myo::Pose pose,
+                  PosePatterns::Pattern pattern) {
+          if (pattern == PosePatterns::doubleClick) {
+            if (pose == myo::Pose::fist) {
+              locker.unlock();
+            }
+          }
         },
-        [](myo::Myo* myo) {
-          // Put perioidic callback to unlocking control object here
-        });
+        [&locker](myo::Myo* myo) { locker.onPeriodic(); });
 
     PoseGestures pose_gests(
         PoseGestures::SUGGESTED_MAX_CLICK_TIME,
