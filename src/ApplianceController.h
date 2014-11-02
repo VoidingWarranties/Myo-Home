@@ -1,3 +1,5 @@
+#include "LightsController.h"
+
 #include <myo/myo.hpp>
 
 class ApplianceController {
@@ -13,12 +15,14 @@ class ApplianceController {
                   std::cout << "unlocked!" << std::endl;
                   myo->vibrate(myo::Myo::vibrationShort);
                   myo->vibrate(myo::Myo::vibrationShort);
-                }) {}
+                }),
+        lights_controller_(&locker_) {}
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
     if (!locker_.locked()) {
       switch (current_appliance_) {
         case lights:
+          lights_controller_.onPose(myo, pose, pattern);
           break;
         case media:
           break;
@@ -36,9 +40,7 @@ class ApplianceController {
     }
   }
 
-  void onPeriodic() {
-    locker_.onPeriodic();
-  }
+  void onPeriodic() { locker_.onPeriodic(); }
 
  private:
   enum Appliance { lights, media };
@@ -46,4 +48,6 @@ class ApplianceController {
   Appliance current_appliance_;
   myo::Myo* myo_;
   LockController locker_;
+
+  LightsController lights_controller_;
 };
