@@ -33,22 +33,20 @@ class LightsController {
       yaw_diff += (2 * M_PI);
     }
     size_t light = (yaw_diff < 0 ? 0 : 1);
-    if (pattern == PosePatterns::singleClick || pattern == PosePatterns::hold) {
-      if (pose == myo::Pose::fingersSpread) {
-        turnOn(light);
-        locker_p_->extendUnlock();
-      } else if (pose == myo::Pose::fist) {
-        turnOff(light);
-        locker_p_->extendUnlock();
-      } else if (pose == myo::Pose::waveIn) {
-        turnOn(0);
-        turnOff(1);
-        locker_p_->extendUnlock();
-      } else if (pose == myo::Pose::waveOut) {
-        turnOff(0);
-        turnOn(1);
-        locker_p_->extendUnlock();
-      }
+    if (pose == myo::Pose::fingersSpread) {
+      turnOn(light);
+      locker_p_->extendUnlock();
+    } else if (pose == myo::Pose::fist) {
+      turnOff(light);
+      locker_p_->extendUnlock();
+    } else if (pose == myo::Pose::waveIn) {
+      turnOn(0);
+      turnOff(1);
+      locker_p_->extendUnlock();
+    } else if (pose == myo::Pose::waveOut) {
+      turnOff(0);
+      turnOn(1);
+      locker_p_->extendUnlock();
     }
   }
 
