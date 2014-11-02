@@ -22,7 +22,7 @@ int main() {
     PosePatterns pose_patts(
         PosePatterns::SUGGESTED_MAX_DELAY,
         [&app_controller](myo::Myo* myo, uint64_t timestamp, myo::Pose pose,
-                  PosePatterns::Pattern pattern) {
+                          PosePatterns::Pattern pattern) {
           app_controller.onPose(myo, pose, pattern);
         },
         [&app_controller](myo::Myo* myo) { app_controller.onPeriodic(); });
@@ -47,6 +47,11 @@ int main() {
         [&debounce](myo::Myo* myo, uint64_t timestamp,
                     myo::Pose pose) { debounce.onPose(myo, timestamp, pose); },
         [&debounce](myo::Myo* myo) { debounce.onPeriodic(myo); });
+
+    listener.setOnOrientationDataCallback([&app_controller](
+        myo::Myo* myo, uint64_t timestamp, const myo::Quaternion<float>& quat) {
+      app_controller.onOrientationData(myo, timestamp, quat);
+    });
 
     hub.addListener(&listener);
 

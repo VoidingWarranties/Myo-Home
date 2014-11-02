@@ -1,7 +1,7 @@
 class LightsController {
  public:
   LightsController(LockController* locker_p)
-      : locker_p_(locker_p), light_states_{false} {}
+      : locker_p_(locker_p), yaw_(0), yaw_mid_(0), light_states_{false} {}
 
   void turnOn(size_t light) {
     // assert light < num_lights_
@@ -25,12 +25,20 @@ class LightsController {
   }
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
-    if (pattern == PosePatterns::singleClick) {
+    float yaw_diff = yaw_mid_ - yaw_;
+    if (yaw_diff > M_PI) {
+      yaw_diff -= (2 * M_PI);
+    }
+    if (yaw_diff < -M_PI) {
+      yaw_diff += (2 * M_PI);
+    }
+    size_t light = (yaw_diff < 0 ? 0 : 1);
+    if (pattern == PosePatterns::singleClick || pattern == PosePatterns::hold) {
       if (pose == myo::Pose::fingersSpread) {
-        turnOn(0);
+        turnOn(light);
         locker_p_->extendUnlock();
       } else if (pose == myo::Pose::fist) {
-        turnOff(0);
+        turnOff(light);
         locker_p_->extendUnlock();
       } else if (pose == myo::Pose::waveIn) {
         turnOn(0);
@@ -44,9 +52,12 @@ class LightsController {
     }
   }
 
+  void setYaw(float yaw) { yaw_ = yaw; }
+  void setYawMid(float mid) { yaw_mid_ = mid; }
+
  private:
   LockController* locker_p_;
-
   bool light_states_[2];
   size_t num_lights_ = 2;
+  float yaw_, yaw_mid_;
 };

@@ -37,7 +37,7 @@ class LockController {
     }
   }
 
-  static const int SUGGESTED_UNLOCK_TIME = 3000;
+  static const int SUGGESTED_UNLOCK_TIME = 5000;
 
  private:
   int unlock_time_;

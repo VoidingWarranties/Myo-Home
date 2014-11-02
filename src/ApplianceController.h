@@ -16,12 +16,13 @@ class ApplianceController {
                   myo->vibrate(myo::Myo::vibrationShort);
                   myo->vibrate(myo::Myo::vibrationShort);
                 }),
-        lights_controller_(&locker_) {}
+        lights_controller_(&locker_), yaw_(0) {}
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
     if (!locker_.locked()) {
       switch (current_appliance_) {
         case lights:
+          lights_controller_.setYaw(yaw_);
           lights_controller_.onPose(myo, pose, pattern);
           break;
         case media:
@@ -30,6 +31,7 @@ class ApplianceController {
     } else {
       if (pattern == PosePatterns::doubleClick) {
         if (pose == myo::Pose::fingersSpread) {
+          lights_controller_.setYawMid(yaw_);
           current_appliance_ = lights;
           locker_.unlock();
         } else if (pose == myo::Pose::fist) {
@@ -40,6 +42,12 @@ class ApplianceController {
     }
   }
 
+  void onOrientationData(myo::Myo* myo, uint64_t timestamp,
+                         const myo::Quaternion<float>& quat) {
+    yaw_ = atan2(2.0f * (quat.w() * quat.z() + quat.x() * quat.y()),
+                 1.0f - 2.0f * (quat.y() * quat.y() + quat.z() * quat.z()));
+  }
+
   void onPeriodic() { locker_.onPeriodic(); }
 
  private:
@@ -48,6 +56,7 @@ class ApplianceController {
   Appliance current_appliance_;
   myo::Myo* myo_;
   LockController locker_;
+  float yaw_;
 
   LightsController lights_controller_;
 };
