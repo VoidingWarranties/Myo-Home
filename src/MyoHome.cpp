@@ -5,6 +5,7 @@
 #include "../../Myo-Intelligesture/src/PoseGestures.h"
 #include "../../Myo-Intelligesture/src/PosePatterns.h"
 #include "LockController.h"
+#include "ApplianceController.h"
 
 #include <myo/myo.hpp>
 
@@ -16,28 +17,15 @@ int main() {
       throw std::runtime_error("Unable to find a Myo!");
     }
 
-    LockController locker(LockController::SUGGESTED_UNLOCK_TIME,
-                          [myo]() {
-                            std::cout << "locked!" << std::endl;
-                            myo->vibrate(myo::Myo::vibrationMedium);
-                          },
-                          [myo]() {
-                            std::cout << "unlocked!" << std::endl;
-                            myo->vibrate(myo::Myo::vibrationShort);
-                            myo->vibrate(myo::Myo::vibrationShort);
-                          });
+    ApplianceController app_controller(myo);
 
     PosePatterns pose_patts(
         PosePatterns::SUGGESTED_MAX_DELAY,
-        [&locker](myo::Myo* myo, uint64_t timestamp, myo::Pose pose,
+        [&app_controller](myo::Myo* myo, uint64_t timestamp, myo::Pose pose,
                   PosePatterns::Pattern pattern) {
-          if (pattern == PosePatterns::doubleClick) {
-            if (pose == myo::Pose::fist) {
-              locker.unlock();
-            }
-          }
+          app_controller.onPose(myo, pose, pattern);
         },
-        [&locker](myo::Myo* myo) { locker.onPeriodic(); });
+        [&app_controller](myo::Myo* myo) { app_controller.onPeriodic(); });
 
     PoseGestures pose_gests(
         PoseGestures::SUGGESTED_MAX_CLICK_TIME,
