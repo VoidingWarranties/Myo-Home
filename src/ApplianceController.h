@@ -1,4 +1,5 @@
 #include "LightsController.h"
+#include "MediaController.h"
 
 #include <myo/myo.hpp>
 
@@ -16,7 +17,10 @@ class ApplianceController {
                   myo->vibrate(myo::Myo::vibrationShort);
                   myo->vibrate(myo::Myo::vibrationShort);
                 }),
-        lights_controller_(&locker_), yaw_(0) {}
+        lights_controller_(&locker_),
+        roll_(0),
+        yaw_(0),
+        media_controller_(&locker_) {}
 
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
     if (!locker_.locked()) {
@@ -30,6 +34,7 @@ class ApplianceController {
             lights_controller_.onPose(myo, pose, pattern);
             break;
           case media:
+            media_controller_.onPose(myo, pose, pattern);
             break;
         }
       }
@@ -49,11 +54,17 @@ class ApplianceController {
 
   void onOrientationData(myo::Myo* myo, uint64_t timestamp,
                          const myo::Quaternion<float>& quat) {
+    roll_ = atan2(2.0f * (quat.w() * quat.x() + quat.y() * quat.z()),
+                  1.0f - 2.0f * (quat.x() * quat.x() + quat.y() * quat.y()));
     yaw_ = atan2(2.0f * (quat.w() * quat.z() + quat.x() * quat.y()),
                  1.0f - 2.0f * (quat.y() * quat.y() + quat.z() * quat.z()));
+    if (current_appliance_ == media) media_controller_.setRoll(roll_);
   }
 
-  void onPeriodic() { locker_.onPeriodic(); }
+  void onPeriodic() {
+    locker_.onPeriodic();
+    if (current_appliance_ == media) media_controller_.onPeriodic();
+  }
 
  private:
   enum Appliance { lights, media };
@@ -61,7 +72,9 @@ class ApplianceController {
   Appliance current_appliance_;
   myo::Myo* myo_;
   LockController locker_;
+  float roll_;
   float yaw_;
 
   LightsController lights_controller_;
+  MediaController media_controller_;
 };
