@@ -1,7 +1,9 @@
+#include <unistd.h>
+
 class LightsController {
  public:
   LightsController(LockController* locker_p)
-      : locker_p_(locker_p), roll_(0), roll_mid_(0), yaw_(0), yaw_mid_(0), light_states_{false} {}
+      : locker_p_(locker_p), roll_(0), roll_mid_(0), yaw_(0), yaw_mid_(0), pitch_(0), light_states_{false} {}
 
   void turnOn(size_t light) {
     // assert light < num_lights_
@@ -21,6 +23,19 @@ class LightsController {
           "echo -n " + std::to_string(light + 1) + " >> /dev/cu.usbmodem1421";
       std::system(cmd.c_str());
       light_states_[light] = false;
+    }
+  }
+
+  void partyMode() {
+    int i = 0;
+    while (i < 3) {
+      turnOn(0);
+      turnOff(1);
+      usleep(250000);
+      turnOn(1);
+      turnOff(0);
+      usleep(250000);
+      ++i;
     }
   }
 
@@ -77,9 +92,11 @@ class LightsController {
   void setYaw(float yaw) { yaw_ = yaw; }
   void setYawMid(float mid) { yaw_mid_ = mid; }
 
+  void setPitch(float pitch) { pitch_ = pitch; }
+
  private:
   LockController* locker_p_;
   bool light_states_[2];
   size_t num_lights_ = 2;
-  float roll_, roll_mid_, yaw_, yaw_mid_;
+  float roll_, roll_mid_, yaw_, yaw_mid_, pitch_;
 };

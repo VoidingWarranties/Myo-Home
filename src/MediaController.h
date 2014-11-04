@@ -14,6 +14,10 @@ class MediaController {
         arm_(myo::armRight),
         x_direction_(myo::xDirectionUnknown) {}
 
+  void togglePlay() {
+    media_manager_.togglePlay();
+  }
+
   void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
     if (arm_ == myo::armLeft) {
       if (pose == myo::Pose::waveIn) {
@@ -41,6 +45,7 @@ class MediaController {
     if (pattern == PosePatterns::hold && pose == myo::Pose::fist) {
       controlling_volume_ = true;
       roll_mid_ = roll_;
+      std::cout << "Adjusting volume..." << std::endl;
       locker_p_->extendUnlock();
       myo->vibrate(myo::Myo::vibrationShort);
     } else if (last_pattern_ == PosePatterns::hold &&
@@ -50,6 +55,7 @@ class MediaController {
     }
     if (pattern == PosePatterns::hold && (pose == myo::Pose::waveIn || pose == myo::Pose::waveOut)) {
       controlling_position_ = true;
+      std::cout << "Seeking VLC" << std::endl;
       locker_p_->extendUnlock();
     } else {
       controlling_position_ = false;
