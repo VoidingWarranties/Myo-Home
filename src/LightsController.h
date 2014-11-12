@@ -10,7 +10,7 @@ class LightsController {
     if (!light_states_[light]) {
       std::cout << "turning light " << light << " on" << std::endl;
       std::string cmd =
-          "echo -n " + std::to_string(light + 1) + " >> /dev/cu.usbmodem1421";
+          "echo -n " + std::to_string(light + 1) + " >> /dev/cu.usbserial-AH01L4DJ";
       std::system(cmd.c_str());
       light_states_[light] = true;
     }
@@ -20,7 +20,7 @@ class LightsController {
     if (light_states_[light]) {
       std::cout << "turning light " << light << " off" << std::endl;
       std::string cmd =
-          "echo -n " + std::to_string(light + 1) + " >> /dev/cu.usbmodem1421";
+          "echo -n " + std::to_string(light + 1) + " >> /dev/cu.usbserial-AH01L4DJ";
       std::system(cmd.c_str());
       light_states_[light] = false;
     }
