@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include "../../Myo-Intelligesture/src/AtomicEventListener.h"
-#include "../../Myo-Intelligesture/src/Debounce.h"
-#include "../../Myo-Intelligesture/src/PoseGestures.h"
-#include "../../Myo-Intelligesture/src/PosePatterns.h"
+#include "../../../Myo-Intelligesture/src/AtomicEventListener.h"
+#include "../../../Myo-Intelligesture/src/Debounce.h"
+#include "../../../Myo-Intelligesture/src/PoseGestures.h"
+#include "../../../Myo-Intelligesture/src/PosePatterns.h"
 #include "LockController.h"
 #include "ApplianceController.h"
 

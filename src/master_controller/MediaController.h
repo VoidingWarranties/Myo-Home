@@ -1,4 +1,4 @@
-#include "../../Myo-Media/src/ApplicationControlManager.h"
+#include "../../../Myo-Media/src/ApplicationControlManager.h"
 
 class MediaController {
  public:
