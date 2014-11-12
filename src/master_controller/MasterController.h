@@ -5,6 +5,7 @@
 #include "../../../Myo-Intelligesture/src/PoseGestures.h"
 #include "LockController.h"
 #include "LightsController.h"
+#include "MediaController.h"
 
 template <class BaseClass = PoseGestures<>,
           class PoseClass = PoseGestures<>::Pose>
@@ -13,7 +14,8 @@ class MasterController : public BaseClass {
   MasterController(myo::Myo* myo)
       : locker_(myo),
         current_appliance_(Appliance::lights),
-        lights_controller_(&locker_) {}
+        lights_controller_(&locker_),
+        media_controller_(&locker_) {}
 
   void onPose(myo::Myo* myo, PoseClass pose) {
     std::cout << "detected pose: " << pose << std::endl;
@@ -39,6 +41,7 @@ class MasterController : public BaseClass {
           lights_controller_.onPose(myo, pose);
           break;
         case Appliance::media:
+          media_controller_.onPose(myo, pose);
           break;
       }
     }
@@ -49,12 +52,21 @@ class MasterController : public BaseClass {
     BaseClass::onOrientationData(myo, timestamp, quat);
 
     lights_controller_.onOrientationData(myo, quat);
+    media_controller_.onOrientationData(myo, quat);
   }
 
   void onPeriodic(myo::Myo* myo) {
     BaseClass::onPeriodic(myo);
 
     locker_.onPeriodic();
+    if (current_appliance_ == Appliance::media) media_controller_.onPeriodic();
+  }
+
+  virtual void onArmRecognized(myo::Myo* myo, uint64_t timestamp, myo::Arm arm,
+                       myo::XDirection x_direction) {
+    BaseClass::onArmRecognized(myo, timestamp, arm, x_direction);
+
+    media_controller_.onArmRecognized(myo, arm, x_direction);
   }
 
  private:
@@ -64,6 +76,7 @@ class MasterController : public BaseClass {
   Appliance current_appliance_;
 
   LightsController lights_controller_;
+  MediaController media_controller_;
 };
 
 #endif
