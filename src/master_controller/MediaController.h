@@ -9,10 +9,11 @@ class MediaController {
  public:
   MediaController(LockController* locker_p)
       : locker_p_(locker_p),
-        media_manager_(ApplicationControlManager::supported_apps_t::VLC),
+        media_manager_(ApplicationControlManager::supported_apps_t::ITUNES),
         rotation_(),
         starting_rotation_(),
         controlling_volume_(false),
+        previous_controlling_position_(false),
         controlling_position_(false),
         last_pose_(),
         arm_(myo::armRight),
@@ -50,7 +51,7 @@ class MediaController {
                (pose.pose() == PoseGestures<>::Pose::waveIn ||
                 pose.pose() == PoseGestures<>::Pose::waveOut)) {
       controlling_position_ = true;
-      std::cout << "Seeking VLC" << std::endl;
+      std::cout << "Seeking iTunes" << std::endl;
       locker_p_->extendUnlock();
     } else {
       controlling_position_ = false;
@@ -76,6 +77,10 @@ class MediaController {
       } else {
         media_manager_.stepForward();
       }
+      previous_controlling_position_ = true;
+    } else if (previous_controlling_position_) {
+      media_manager_.resume();
+      previous_controlling_position_ = false;
     }
   }
 
@@ -92,8 +97,7 @@ class MediaController {
   LockController* locker_p_;
   ApplicationControlManager media_manager_;
   myo::Quaternion<float> rotation_, starting_rotation_;
-  bool controlling_volume_;
-  bool controlling_position_;
+  bool controlling_volume_, controlling_position_, previous_controlling_position_;
   PoseGestures<>::Pose last_pose_;
   myo::Arm arm_;
   myo::XDirection x_direction_;
