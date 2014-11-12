@@ -68,8 +68,8 @@ class MediaController {
       }
       int volume_diff = roll_diff * 50; // Change this to your preference.
       media_manager_.incrementVolumeBy(volume_diff);
-    }
-    if (controlling_position_) {
+      starting_rotation_ = rotation_;
+    } else if (controlling_position_) {
       locker_p_->extendUnlock();
       if (last_pose_ == myo::Pose::waveIn) {
         media_manager_.stepBackward();
