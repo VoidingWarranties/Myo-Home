@@ -1,13 +1,6 @@
 #include <iostream>
-
-#include "../../../Myo-Intelligesture/src/AtomicEventListener.h"
-#include "../../../Myo-Intelligesture/src/Debounce.h"
-#include "../../../Myo-Intelligesture/src/PoseGestures.h"
-#include "../../../Myo-Intelligesture/src/PosePatterns.h"
-#include "LockController.h"
-#include "ApplianceController.h"
-
 #include <myo/myo.hpp>
+#include "MasterController.h"
 
 int main() {
   try {
@@ -17,51 +10,12 @@ int main() {
       throw std::runtime_error("Unable to find a Myo!");
     }
 
-    ApplianceController app_controller(myo);
-
-    PosePatterns pose_patts(
-        PosePatterns::SUGGESTED_MAX_DELAY,
-        [&app_controller](myo::Myo* myo, uint64_t timestamp, myo::Pose pose,
-                          PosePatterns::Pattern pattern) {
-          app_controller.onPose(myo, pose, pattern);
-        },
-        [&app_controller](myo::Myo* myo) { app_controller.onPeriodic(); });
-
-    PoseGestures pose_gests(
-        PoseGestures::SUGGESTED_MAX_CLICK_TIME,
-        PoseGestures::SUGGESTED_HOLD_TIME,
-        [&pose_patts](myo::Myo* myo, uint64_t timestamp, myo::Pose pose,
-                      PoseGestures::Gesture gesture) {
-          pose_patts.onPose(myo, timestamp, pose, gesture);
-        },
-        [&pose_patts](myo::Myo* myo) { pose_patts.onPeriodic(myo); });
-
-    Debounce debounce(
-        Debounce::SUGGESTED_DEBOUNCE_DELAY,
-        [&pose_gests](myo::Myo* myo, uint64_t timestamp, myo::Pose pose) {
-          pose_gests.onPose(myo, timestamp, pose);
-        },
-        [&pose_gests](myo::Myo* myo) { pose_gests.onPeriodic(myo); });
-
-    AtomicEventListener listener(
-        [&debounce](myo::Myo* myo, uint64_t timestamp,
-                    myo::Pose pose) { debounce.onPose(myo, timestamp, pose); },
-        [&debounce](myo::Myo* myo) { debounce.onPeriodic(myo); });
-
-    listener.setOnOrientationDataCallback([&app_controller](
-        myo::Myo* myo, uint64_t timestamp, const myo::Quaternion<float>& quat) {
-      app_controller.onOrientationData(myo, timestamp, quat);
-    });
-
-    listener.setOnArmRecognizedCallback([&app_controller](myo::Myo* myo, uint64_t timestamp, myo::Arm arm, myo::XDirection x_direction) {
-      app_controller.onArmRecognized(myo, arm, x_direction);
-    });
-
-    hub.addListener(&listener);
+    MasterController<> master_controller(myo);
+    hub.addListener(&master_controller);
 
     while (true) {
       hub.run(1000 / 20);
-      listener.onPeriodic(myo);
+      master_controller.onPeriodic(myo);
     }
   } catch (const std::exception& ex) {
     std::cerr << "Error: " << ex.what() << std::endl;

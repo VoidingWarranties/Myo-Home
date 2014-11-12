@@ -1,9 +1,18 @@
+#ifndef MYO_HOME_LIGHTSCONTROLLER_H_
+#define MYO_HOME_LIGHTSCONTROLLER_H_
+
 #include <unistd.h>
+#include <myo/myo.hpp>
+#include "../../../Myo-Intelligesture/src/PoseGestures.h"
+#include "../../../Myo-Intelligesture/src/OrientationUtility.h"
 
 class LightsController {
  public:
   LightsController(LockController* locker_p)
-      : locker_p_(locker_p), roll_(0), roll_mid_(0), yaw_(0), yaw_mid_(0), pitch_(0), light_states_{false} {}
+      : locker_p_(locker_p),
+        light_states_{false},
+        rotation_(),
+        starting_rotation_() {}
 
   void turnOn(size_t light) {
     // assert light < num_lights_
@@ -39,64 +48,42 @@ class LightsController {
     }
   }
 
-  void onPose(myo::Myo* myo, myo::Pose pose, PosePatterns::Pattern pattern) {
-    float yaw_diff = yaw_mid_ - yaw_;
-    if (yaw_diff > M_PI) {
-      yaw_diff -= (2 * M_PI);
-    }
-    if (yaw_diff < -M_PI) {
-      yaw_diff += (2 * M_PI);
-    }
-
-    float roll_diff = roll_ - roll_mid_;
-    if (roll_diff > M_PI) {
-      roll_diff -= (2 * M_PI);
-    }
-    if (roll_diff < -M_PI) {
-      roll_diff += (2 * M_PI);
-    }
-
+  void onPose(myo::Myo* myo, PoseGestures<>::Pose pose) {
+    float yaw_diff = OrientationUtility::RelativeOrientation(
+        starting_rotation_, rotation_, OrientationUtility::QuaternionToYaw);
     size_t light = (yaw_diff < 0 ? 0 : 1);
-    if (pose == myo::Pose::fingersSpread) {
+    if (pose.pose() == PoseGestures<>::Pose::fingersSpread) {
       turnOn(light);
       locker_p_->extendUnlock();
-    } else if (pose == myo::Pose::fist) {
+    } else if (pose.pose() == PoseGestures<>::Pose::fist) {
       turnOff(light);
       locker_p_->extendUnlock();
-    } else if (pose == myo::Pose::waveIn) {
-      if (roll_diff < -0.2) {
-        for (size_t i = 0; i < num_lights_; ++i) {
-          turnOff(i);
-        }
-      } else {
-        turnOn(0);
-        turnOff(1);
+    } else if (pose.pose() == PoseGestures<>::Pose::waveUp) {
+      for (size_t i = 0; i < num_lights_; ++i) {
+        turnOn(i);
       }
       locker_p_->extendUnlock();
-    } else if (pose == myo::Pose::waveOut) {
-      if (roll_diff < -0.2) {
-        for (size_t i = 0; i < num_lights_; ++i) {
-          turnOn(i);
-        }
-      } else {
-        turnOff(0);
-        turnOn(1);
+    } else if (pose.pose() == PoseGestures<>::Pose::waveDown) {
+      for (size_t i = 0; i < num_lights_; ++i) {
+        turnOff(i);
       }
       locker_p_->extendUnlock();
     }
   }
 
-  void setRoll(float roll) { roll_ = roll; }
-  void setRollMid(float mid) { roll_mid_ = mid; }
+  void onOrientationData(myo::Myo* myo, const myo::Quaternion<float>& quat) {
+    rotation_ = quat;
+  }
 
-  void setYaw(float yaw) { yaw_ = yaw; }
-  void setYawMid(float mid) { yaw_mid_ = mid; }
-
-  void setPitch(float pitch) { pitch_ = pitch; }
+  void markStartingRotation() {
+    starting_rotation_ = rotation_;
+  }
 
  private:
   LockController* locker_p_;
   bool light_states_[2];
   size_t num_lights_ = 2;
-  float roll_, roll_mid_, yaw_, yaw_mid_, pitch_;
+  myo::Quaternion<float> rotation_, starting_rotation_;
 };
+
+#endif

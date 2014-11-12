@@ -6,8 +6,8 @@ boolean state2 = false;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(led1, OUTPUT);
-  pinMode(led2, OUTPUT);
+  pinMode(relay1, OUTPUT);
+  pinMode(relay2, OUTPUT);
 }
 
 void loop() {
@@ -20,7 +20,7 @@ void loop() {
       } else {
         state1 = false;
       }
-      digitalWrite(led1, state1);
+      digitalWrite(relay1, state1);
     } else if (incomingByte == '2') {
       Serial.println("Toggling light 2");
       if (state2 == false){
@@ -28,7 +28,7 @@ void loop() {
       } else {
         state2 = false;
       }
-      digitalWrite(led2, state2);
+      digitalWrite(relay2, state2);
     }
   }
 }
