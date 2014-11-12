@@ -10,7 +10,7 @@ int main() {
       throw std::runtime_error("Unable to find a Myo!");
     }
 
-    MasterController<> master_controller;
+    MasterController<> master_controller(myo);
     hub.addListener(&master_controller);
 
     while (true) {
