@@ -18,8 +18,6 @@ class MasterController : public BaseClass {
         media_controller_(&locker_) {}
 
   void onPose(myo::Myo* myo, PoseClass pose) {
-    std::cout << "detected pose: " << pose << std::endl;
-
     if (locker_.locked()) {
       if (pose.gesture() == PoseClass::Gesture::doubleClick) {
         if (pose.pose() == PoseClass::fingersSpread) {
