@@ -38,7 +38,6 @@ class MediaController {
         starting_rotation_ = rotation_;
         std::cout << "Adjusting volume..." << std::endl;
         locker_p_->extendUnlock();
-        myo->vibrate(myo::Myo::vibrationShort);
       }
     } else if (pose.gesture() == PoseGestures<>::Pose::Gesture::singleClick ||
                pose.gesture() == PoseGestures<>::Pose::Gesture::doubleClick) {
