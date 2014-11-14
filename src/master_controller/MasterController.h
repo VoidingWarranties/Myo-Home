@@ -18,22 +18,22 @@ class MasterController : public BaseClass {
         media_controller_(&locker_) {}
 
   void onPose(myo::Myo* myo, PoseClass pose) {
-    if (locker_.locked()) {
-      if (pose.gesture() == PoseClass::Gesture::doubleClick) {
-        if (pose.pose() == PoseClass::fingersSpread) {
-          std::cout << "Lights mode" << std::endl;
-          lights_controller_.markStartingRotation();
-          current_appliance_ = Appliance::lights;
-          this->calibrateOrientation();
-          locker_.unlock();
-        } else if (pose.pose() == PoseClass::fist) {
-          std::cout << "Media mode" << std::endl;
-          current_appliance_ = Appliance::media;
-          this->calibrateOrientation();
-          locker_.unlock();
-        }
-      }
-    } else {
+    if (pose.gesture() == PoseClass::Gesture::doubleClick &&
+        pose.pose() == PoseClass::fingersSpread &&
+        (locker_.locked() || current_appliance_ != Appliance::lights)) {
+      std::cout << "Lights mode" << std::endl;
+      lights_controller_.markStartingRotation();
+      current_appliance_ = Appliance::lights;
+      this->calibrateOrientation();
+      locker_.unlock();
+    } else if (pose.gesture() == PoseClass::Gesture::doubleClick &&
+               pose.pose() == PoseClass::fist &&
+               (locker_.locked() || current_appliance_ != Appliance::media)) {
+      std::cout << "Media mode" << std::endl;
+      current_appliance_ = Appliance::media;
+      this->calibrateOrientation();
+      locker_.unlock();
+    } else if (!locker_.locked()) {
       switch (current_appliance_) {
         case Appliance::lights:
           lights_controller_.onPose(myo, pose);
