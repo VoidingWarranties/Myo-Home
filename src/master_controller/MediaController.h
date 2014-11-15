@@ -16,8 +16,8 @@ class MediaController {
         rotation_(),
         starting_rotation_(),
         controlling_volume_(false),
-        previous_controlling_position_(false),
         controlling_position_(false),
+        previous_controlling_position_(false),
         last_pose_(),
         arm_(myo::armRight),
         x_direction_(myo::xDirectionUnknown) {}

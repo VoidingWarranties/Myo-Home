@@ -40,7 +40,6 @@ class LockController {
  private:
   myo::Myo* myo_;
   int unlock_time_;
-  std::function<void(void)> onLockCallback_, onUnlockCallback_;
   bool locked_;
   BasicTimer unlock_timer_;
 };
