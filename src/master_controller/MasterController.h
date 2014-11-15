@@ -10,9 +10,7 @@
 #include "LightsController.h"
 #include "MediaController.h"
 
-template <class BaseClass = PoseGestures<>,
-          class PoseClass = PoseGestures<>::Pose>
-class MasterController : public BaseClass {
+class MasterController : public PoseGestures<> {
  public:
   MasterController(myo::Myo* myo)
       : locker_(myo),
@@ -20,17 +18,17 @@ class MasterController : public BaseClass {
         lights_controller_(&locker_),
         media_controller_(&locker_) {}
 
-  void onPose(myo::Myo* myo, PoseClass pose) {
-    if (pose.gesture() == PoseClass::Gesture::doubleClick &&
-        pose.pose() == PoseClass::fingersSpread &&
+  void onPose(myo::Myo* myo, PoseGestures<>::Pose pose) {
+    if (pose.gesture() == PoseGestures<>::Pose::Gesture::doubleClick &&
+        pose.pose() == PoseGestures<>::Pose::fingersSpread &&
         (locker_.locked() || current_appliance_ != Appliance::lights)) {
       std::cout << "Lights mode" << std::endl;
       lights_controller_.markStartingRotation();
       current_appliance_ = Appliance::lights;
       this->calibrateOrientation();
       locker_.unlock();
-    } else if (pose.gesture() == PoseClass::Gesture::doubleClick &&
-               pose.pose() == PoseClass::fist &&
+    } else if (pose.gesture() == PoseGestures<>::Pose::Gesture::doubleClick &&
+               pose.pose() == PoseGestures<>::Pose::fist &&
                (locker_.locked() || current_appliance_ != Appliance::media)) {
       std::cout << "Media mode" << std::endl;
       current_appliance_ = Appliance::media;
@@ -50,14 +48,14 @@ class MasterController : public BaseClass {
 
   void onOrientationData(myo::Myo* myo, uint64_t timestamp,
                          const myo::Quaternion<float>& quat) {
-    BaseClass::onOrientationData(myo, timestamp, quat);
+    PoseGestures<>::onOrientationData(myo, timestamp, quat);
 
     lights_controller_.onOrientationData(myo, quat);
     media_controller_.onOrientationData(myo, quat);
   }
 
   void onPeriodic(myo::Myo* myo) {
-    BaseClass::onPeriodic(myo);
+    PoseGestures<>::onPeriodic(myo);
 
     locker_.onPeriodic();
     if (current_appliance_ == Appliance::media) media_controller_.onPeriodic();
@@ -65,7 +63,7 @@ class MasterController : public BaseClass {
 
   virtual void onArmRecognized(myo::Myo* myo, uint64_t timestamp, myo::Arm arm,
                                myo::XDirection x_direction) {
-    BaseClass::onArmRecognized(myo, timestamp, arm, x_direction);
+    PoseGestures<>::onArmRecognized(myo, timestamp, arm, x_direction);
 
     media_controller_.onArmRecognized(myo, arm, x_direction);
   }
