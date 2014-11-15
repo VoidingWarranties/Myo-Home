@@ -1,3 +1,7 @@
+/* Manages the locking and unlocking for the UI. It will automatically re-lock
+ * after the specified timeout.
+ */
+
 #ifndef MYO_HOME_LOCKCONTROLLER_H_
 #define MYO_HOME_LOCKCONTROLLER_H_
 

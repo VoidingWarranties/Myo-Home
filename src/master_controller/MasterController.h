@@ -1,3 +1,6 @@
+/* Controls and manages the UI and all of the appliances.
+ */
+
 #ifndef MYO_INTELLIGESTURE_MASTERCONTROLLER_H_
 #define MYO_INTELLIGESTURE_MASTERCONTROLLER_H_
 
@@ -61,7 +64,7 @@ class MasterController : public BaseClass {
   }
 
   virtual void onArmRecognized(myo::Myo* myo, uint64_t timestamp, myo::Arm arm,
-                       myo::XDirection x_direction) {
+                               myo::XDirection x_direction) {
     BaseClass::onArmRecognized(myo, timestamp, arm, x_direction);
 
     media_controller_.onArmRecognized(myo, arm, x_direction);

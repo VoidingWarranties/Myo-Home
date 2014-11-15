@@ -1,3 +1,6 @@
+/* Provides a user interface for controlling media using the MyoMedia library.
+ */
+
 #ifndef MYO_HOME_MEDIACONTROLLER_H_
 #define MYO_HOME_MEDIACONTROLLER_H_
 
@@ -19,6 +22,8 @@ class MediaController {
         arm_(myo::armRight),
         x_direction_(myo::xDirectionUnknown) {}
 
+  // This function is only provided to allow the master controller to trigger
+  // party mode!
   void togglePlay() { media_manager_.togglePlay(); }
 
   void onPose(myo::Myo* myo, PoseGestures<>::Pose pose) {
@@ -62,6 +67,8 @@ class MediaController {
   void onPeriodic() {
     if (controlling_volume_) {
       locker_p_->extendUnlock();
+      // Calculate the difference in the roll angle from the previous onPeriodic
+      // call, and adjust the volume by a a multiple of this angle.
       float roll_diff = OrientationUtility::RelativeOrientation(
           starting_rotation_, rotation_, OrientationUtility::QuaternionToRoll);
       if (x_direction_ != myo::xDirectionTowardWrist) {
@@ -69,6 +76,10 @@ class MediaController {
       }
       int volume_diff = roll_diff * 50;  // Change this to your preference.
       media_manager_.incrementVolumeBy(volume_diff);
+      // Comment out this next line to make the volume control relative instead
+      // of absolute. Relative means the volume will continue to change if you
+      // rotate and hold your fist at a constant angle. Absolute means the
+      // volume will only change when you are actively rotating your wrist.
       starting_rotation_ = rotation_;
     } else if (controlling_position_) {
       locker_p_->extendUnlock();
@@ -79,6 +90,8 @@ class MediaController {
       }
       previous_controlling_position_ = true;
     } else if (previous_controlling_position_) {
+      // This is necessary for some media applications such as iTunes in order
+      // to stop the fast forwarding / rewinding.
       media_manager_.resume();
       previous_controlling_position_ = false;
     }
