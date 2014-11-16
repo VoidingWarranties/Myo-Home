@@ -61,9 +61,9 @@ class MasterController : public PoseGestures<> {
     if (current_appliance_ == Appliance::media) media_controller_.onPeriodic();
   }
 
-  virtual void onArmRecognized(myo::Myo* myo, uint64_t timestamp, myo::Arm arm,
+  virtual void onArmSync(myo::Myo* myo, uint64_t timestamp, myo::Arm arm,
                                myo::XDirection x_direction) {
-    PoseGestures<>::onArmRecognized(myo, timestamp, arm, x_direction);
+    PoseGestures<>::onArmSync(myo, timestamp, arm, x_direction);
 
     media_controller_.onArmRecognized(myo, arm, x_direction);
   }
